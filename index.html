@@ -1,82 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payment Page</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
-    }
-    .container {
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-    }
-    input, button {
-      padding: 10px;
-      margin: 10px 0;
-      width: 100%;
-      font-size: 1rem;
-    }
-    button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #218838;
-    }
-    img {
-      margin-top: 20px;
-      width: 200px;
-      height: 200px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pay via UPI</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 0 15px;
+    text-align: center;
+  }
+  input, button, a.button {
+    padding: 10px;
+    font-size: 16px;
+    margin: 10px 0;
+    width: 100%;
+    max-width: 300px;
+    display: inline-block;
+  }
+  a.button {
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+  }
+  a.button:disabled {
+    background-color: #888;
+  }
+  img {
+    margin-top: 20px;
+    max-width: 200px;
+  }
+  small {
+    color: #555;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>Pay & Add Your Name</h2>
-    <input type="text" id="name" placeholder="Enter your name" required />
-    <a id="upiLink" target="_blank">
-      <button>Pay via UPI</button>
-    </a>
-    <img src="YOUR_QR_CODE_URL" alt="UPI QR Code">
-    <button onclick="submitName()">Submit Name</button>
-    <p id="confirmation"></p>
-  </div>
+<h2>Send Payment via UPI</h2>
 
-  <script>
-    const upiBase = "upi://pay?pa=aiswaryamangalath95-1@okhdfcbank&pn=YourName&am=500&cu=INR";
+<label for="name">Enter Your Name:</label><br />
+<input type="text" id="name" placeholder="Your name here" />
 
-    document.getElementById("name").addEventListener("input", function () {
-      const name = encodeURIComponent(this.value);
-      const link = upiBase.replace("YourName", name);
-      document.getElementById("upiLink").href = link;
-    });
+<br />
+<a id="upiLink" class="button" href="#" target="_blank" onclick="return checkName()">Pay via UPI</a>
 
-    function submitName() {
-      const name = document.getElementById("name").value.trim();
-      if (!name) {
-        alert("Please enter your name before submitting.");
-        return;
-      }
-      // Log to console (or send to Google Sheet via script)
-      console.log("Name submitted:", name);
-      document.getElementById("confirmation").innerText = `Thank you, ${name}!`;
-      document.getElementById("name").value = "";
+<p id="confirmation"></p>
+
+<!-- Replace this with your actual UPI QR code image link -->
+<img src="https://i.postimg.cc/6pg3qvY2/Screenshot-2025-06-07-163715.png" alt="Scan QR to Pay" />
+
+<p><small>Note: Works best on Android with Google Pay app installed.<br/>
+If nothing happens, copy the UPI ID and pay manually:<br/>
+<strong>aiswarya123@okhdfcbank</strong></small></p>
+
+<script>
+  const upiID = "aiswaryamangalath95-1@okhdfcbank";
+
+  function checkName() {
+    const nameInput = document.getElementById("name");
+    const name = nameInput.value.trim();
+    if (!name) {
+      alert("Please enter your name before paying.");
+      return false;
     }
-  </script>
+    return true;
+  }
+
+  document.getElementById("name").addEventListener("input", function () {
+    const name = encodeURIComponent(this.value.trim() || "User");
+    // Android Google Pay Intent URI:
+    const intentURI = `intent://pay?pa=${upiID}&pn=${name}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+    document.getElementById("upiLink").href = intentURI;
+  });
+
+  // Initialize link on page load with default name
+  window.addEventListener("load", () => {
+    const defaultName = encodeURIComponent("User");
+    const intentURI = `intent://pay?pa=${upiID}&pn=${defaultName}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+    document.getElementById("upiLink").href = intentURI;
+  });
+</script>
 </body>
 </html>
