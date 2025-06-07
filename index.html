@@ -2,81 +2,54 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payment Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UPI Payment</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
-    }
-    .container {
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-    }
-    input, button {
-      padding: 10px;
-      margin: 10px 0;
-      width: 100%;
-      font-size: 1rem;
-    }
-    button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #218838;
-    }
-    img {
-      margin-top: 20px;
-      width: 200px;
-      height: 200px;
-    }
+    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; text-align: center; }
+    input, .button { font-size: 16px; padding: 10px; margin: 10px 0; width: 100%; max-width: 300px; display: inline-block; }
+    .button { background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; }
+    #qrcode canvas { margin-top: 20px; }
+    small { color: #555; display: block; margin-top: 15px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Pay & Add Your Name</h2>
-    <input type="text" id="name" placeholder="Enter your name" required />
-    <a id="upiLink" target="_blank">
-      <button>Pay via UPI</button>
-    </a>
-    <img src="YOUR_QR_CODE_URL" alt="UPI QR Code">
-    <button onclick="submitName()">Submit Name</button>
-    <p id="confirmation"></p>
-  </div>
 
-  <script>
-    const upiBase = "upi://pay?pa=aiswaryamangalath95-1@okhdfcbank&pn=YourName&am=500&cu=INR";
+<h2>Send Money via UPI</h2>
 
-    document.getElementById("name").addEventListener("input", function () {
-      const name = encodeURIComponent(this.value);
-      const link = upiBase.replace("YourName", name);
-      document.getElementById("upiLink").href = link;
+<input id="name" placeholder="Enter your name" />
+
+<a id="upiLink" class="button" href="#" target="_blank">Pay with Google Pay</a>
+
+<div id="qrcode"></div>
+
+<small>
+  Scan the QR with any UPI app (GPay, PhonePe, Paytm)<br>
+  UPI ID: <b>aiswarya123@okhdfcbank</b>
+</small>
+
+<script>
+  const upiID = "aiswaryamangalath95-1@okhdfcbank";
+  const upiLinkEl = document.getElementById("upiLink");
+  const nameInput = document.getElementById("name");
+  const qrDiv = document.getElementById("qrcode");
+
+  function update() {
+    const name = encodeURIComponent(nameInput.value.trim() || "Friend");
+    const upiURL = `upi://pay?pa=${upiID}&pn=${name}&cu=INR`;
+    const intentURL = `intent://pay?pa=${upiID}&pn=${name}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+
+    upiLinkEl.href = intentURL;
+
+    qrDiv.innerHTML = '';
+    QRCode.toCanvas(qrDiv, upiURL, { width: 200 }, function (error) {
+      if (error) console.error(error);
     });
+  }
 
-    function submitName() {
-      const name = document.getElementById("name").value.trim();
-      if (!name) {
-        alert("Please enter your name before submitting.");
-        return;
-      }
-      // Log to console (or send to Google Sheet via script)
-      console.log("Name submitted:", name);
-      document.getElementById("confirmation").innerText = `Thank you, ${name}!`;
-      document.getElementById("name").value = "";
-    }
-  </script>
+  nameInput.addEventListener("input", update);
+  window.onload = update;
+</script>
+
 </body>
 </html>
